@@ -1,121 +1,144 @@
 # ⚛️ Quantum Circuit Simulator
 
-> **A full-stack quantum computing simulator bringing quantum algorithms to your browser** — with an interactive circuit designer, real-time visualization, and 8 cutting-edge quantum algorithm implementations.
+An interactive, browser-based quantum computing playground. Build circuits with a visual designer, watch the state evolve on a Bloch sphere, and explore five classic quantum algorithms through guided visualizations.
 
-![Quantum Simulator](https://img.shields.io/badge/Quantum_Computing-React_TypeScript_Python-blue?style=for-the-badge)
-![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue)
-![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-brightgreen)
+**Stack:** React + TypeScript + Vite (frontend) · Flask + PyTorch (backend)
+
+> **Please read:** this is an **educational visualization tool**, not a production quantum SDK. The circuit designer and Grover's algorithm run real state-vector simulations. The Shor, QFT, QAOA and VQE pages are **illustrative models** — see [What's real and what's illustrative](#-whats-real-and-whats-illustrative) below.
 
 ---
 
-## ✨ What Makes This Special?
+## ✨ Features
 
-This is **not** just another quantum simulator—it's a complete, production-ready learning and development platform:
+| Area | What it does |
+|------|--------------|
+| **Circuit Designer** | Build 1–6 qubit circuits (up to 30 steps) with H, X, Y, Z, S, T, RX/RY/RZ, CNOT, CZ and SWAP. Run up to 100,000 shots and view the measurement histogram and state vector. |
+| **Qiskit IDE** | Paste Qiskit-style code and sync it into the visual circuit (parsed, **not executed** — see [limitations](#qiskit-ide-limitations)). |
+| **Qiskit code export** | The designer generates equivalent Qiskit code for your circuit. |
+| **State Visualization** | Per-qubit Bloch spheres (Three.js) and complex-amplitude phase circles. |
+| **Algorithm pages** | Grover's search, Shor's factoring, QFT, QAOA (Max-Cut), VQE. |
+| **Local fallback** | If the backend is unreachable, the designer falls back to a built-in TypeScript simulator. |
 
-- 🎯 **Interactive Circuit Designer** — Drag-and-drop quantum gates with real-time simulation feedback
-- 🌐 **3D Bloch Sphere Visualization** — See qubit states evolve in real-time
-- 🔬 **8 Quantum Algorithms** — Grover, Shor, QFT, VQE, QAOA, and more with visual walkthroughs
-- 💻 **In-Browser Qiskit IDE** — Write and execute Qiskit code directly in your browser
-- 📊 **Advanced Measurement Visualization** — Histogram charts, phase circles, and state vectors
-- ⚡ **Full-Stack Architecture** — React + TypeScript frontend meets Python/Flask backend
-- 🎓 **Educational & Production-Ready** — Perfect for learning quantum computing or building quantum apps
+*Roadmap item shown in the UI:* connecting to real quantum hardware (not implemented).
+
+---
+
+## 🔬 What's real and what's illustrative
+
+| Feature | Status | How it works |
+|---------|--------|--------------|
+| Circuit Designer | ✅ **Real simulation** | Full state-vector simulation (PyTorch on the backend, TypeScript in the browser fallback). Shot sampling from the exact probabilities. |
+| Grover's algorithm | ✅ **Real simulation** | Oracle sign-flip and diffusion (reflection about the mean) applied directly to the amplitude vector. |
+| Shor's algorithm | 🟡 **Hybrid** | The period `r` is found **classically** by brute force. The post-measurement register state is then built analytically and the QFT is applied via FFT. Factors come from classical post-processing. |
+| QFT | 🟡 **Analytic** | Bloch-sphere angles are computed from a closed-form formula for **computational-basis inputs only**; it does not simulate arbitrary input states. |
+| QAOA | 🔴 **Illustrative model** | Computes the Max-Cut cost of every bitstring, then samples from a Boltzmann-style distribution `∝ exp(α · cost)` where α grows with the layer count. No cost/mixer unitaries are applied and no parameters are optimized. |
+| VQE | 🔴 **Illustrative model** | Plots a synthetic convergence curve (exponential decay + noise) toward hardcoded reference energies (H₂ ≈ −1.137, LiH ≈ −7.882). Ansatz, qubit count and Hamiltonian do not affect the result; no optimizer runs. |
+
+Contributions that replace the QAOA and VQE models with real variational simulations are very welcome (see [Contributing](#-contributing)).
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Python** 3.9+ with `pip`
-- **Node.js** 18+ with `npm`
+
+- **Python 3** with `pip` (a recent version — the pinned `numpy`/`torch` releases need a modern Python; 3.11+ is a safe choice)
+- **Node.js 20+** with `npm` (required by the current Vite version)
 - **Git**
 
-### Setup (2 Minutes)
+> ⚠️ The backend depends on **PyTorch**, which is a large download (hundreds of MB to several GB depending on platform/CUDA). A CPU-only build is sufficient — see the [PyTorch install selector](https://pytorch.org/get-started/locally/) if you want to install it manually first.
 
-**1. Clone the repository:**
+### 1. Clone
+
 ```bash
 git clone https://github.com/bukac82/Quantum-Simulator-V3.0.git
 cd Quantum-Simulator-V3.0
 ```
 
-**2. Start the Backend (Python/Flask):**
+### 2. Backend (Flask)
+
 ```bash
 cd quantum_backend
-
-# Create virtual environment
 python -m venv venv
 
-# Activate (Windows)
-venv\Scripts\activate
-# OR activate (macOS/Linux)
+# macOS / Linux
 source venv/bin/activate
+# Windows
+venv\Scripts\activate
 
-# Install & run
 pip install -r requirement.txt
 python run.py
 ```
-✅ Backend runs at `http://localhost:5000`
 
-**3. Start the Frontend (React/TypeScript):**
+The API runs at **http://localhost:5000** (note: the requirements file is named `requirement.txt`, singular).
+
+### 3. Frontend (React + Vite)
+
 ```bash
-cd ../quantum_frontend
-
+cd quantum_frontend
 npm install
 npm run dev
 ```
-✅ Frontend runs at `http://localhost:5173`
 
-**4. Open your browser** → `http://localhost:5173` and start building quantum circuits!
-
----
-
-## 🎨 Features at a Glance
-
-| Feature | What It Does |
-|---------|--------------|
-| 🔲 **Circuit Designer** | Drag-and-drop quantum gate builder with live simulation |
-| 🌐 **Bloch Sphere** | Real-time 3D visualization of single-qubit states |
-| 📊 **Measurement Histogram** | Probability distribution of measurement outcomes |
-| 🔄 **Grover's Algorithm** | Quantum search with step-by-step walkthroughs |
-| 🔢 **Shor's Algorithm** | Integer factorization for cryptography exploration |
-| 🌊 **Quantum Fourier Transform** | Visual QFT implementation and analysis |
-| 🔬 **VQE (Variational Quantum Eigensolver)** | Find ground states of quantum systems |
-| 🗺️ **QAOA** | Solve combinatorial optimization problems |
-| 💻 **Qiskit IDE** | Write raw Qiskit Python code in the browser |
-| 🎯 **Phase Circle** | Visualize quantum phase information |
-
----
-
-## 🛠️ Technology Stack
-
-### Frontend
-- **React 18** — Modern UI framework
-- **TypeScript** — Type-safe development
-- **Vite** — Lightning-fast build tool
-- **Three.js** — 3D graphics (Bloch sphere)
-- **Tailwind CSS** — Responsive styling
-
-### Backend
-- **Python Flask** — Lightweight REST API
-- **Qiskit** — IBM's quantum computing framework
-- **NumPy** — Numerical computations & matrix operations
-- **CORS Support** — Seamless frontend-backend communication
+Open **http://localhost:5173**.
 
 ---
 
 ## 📡 API Reference
 
-All endpoints are POST-based and return JSON simulation results.
+All endpoints are `POST`, accept and return JSON, and are served from the root path (there is **no** `/api` prefix).
 
-| Endpoint | Purpose | Example Input |
-|----------|---------|---|
-| `POST /api/simulate` | Run custom quantum circuit | `{ "gates": [...], "qubits": 3 }` |
-| `POST /api/grover` | Execute Grover's search | `{ "marked_item": "101" }` |
-| `POST /api/shor` | Run Shor's factorization | `{ "N": 15 }` |
-| `POST /api/qft` | Quantum Fourier Transform | `{ "input_state": [...] }` |
-| `POST /api/vqe` | Variational Quantum Eigensolver | `{ "hamiltonian": [...] }` |
-| `POST /api/qaoa` | QAOA optimization | `{ "problem": "max_cut", "params": [...] }` |
-| `POST /api/qiskit` | Execute raw Qiskit code | `{ "code": "qc = QuantumCircuit(2)..." }` |
+| Endpoint | Purpose | Request body (defaults in parentheses) |
+|----------|---------|----------------------------------------|
+| `/simulate` | Run a circuit | `numQubits` (2), `steps`, `shots` (1024) |
+| `/parse-qiskit` | Convert Qiskit-style code to circuit steps | `code` |
+| `/simulate-grover` | Grover's search | `qubits` (3), `target` ("101"), `iterations` (2), `shots` (1024) |
+| `/simulate-shor` | Period finding / factoring | `N` (15), `a` (7), `shots` (1024) |
+| `/simulate-qft` | QFT Bloch vectors | `qubits` (3), `inputState` ("000"), `inverse` (false) |
+| `/simulate-qaoa` | Max-Cut QAOA model | `qubits` (4), `layers` (2), `edges` (JSON string, e.g. `"[[0,1],[1,2]]"`), `shots` (1000), `mixerType`, `warmStart` |
+| `/simulate-vqe` | VQE convergence model | `qubits` (2), `ansatz`, `optimizer` ("COBYLA"), `shots` (1024), `hamiltonian` ("H2 Molecule") |
+
+### `steps` format for `/simulate`
+
+`steps` is a list of columns (time steps). Each column is a list with one entry per qubit wire: a gate name or `null`.
+
+```json
+{
+  "numQubits": 2,
+  "shots": 1024,
+  "steps": [
+    ["H", null],
+    ["CTRL", "TARG"]
+  ]
+}
+```
+
+Gate tokens: `H X Y Z S T`, `RX(θ) RY(θ) RZ(θ)` (θ in radians, e.g. `"RX(1.5708)"`), and paired two-qubit markers `CTRL/TARG` (CNOT), `CZ_CTRL/CZ_TARG` (CZ), `SWAP1/SWAP2` (SWAP).
+
+Qubit ordering: **wire 0 is the most significant bit** in the state vector and in bitstring labels.
+
+**Example**
+
+```bash
+curl -X POST http://localhost:5000/simulate \
+  -H "Content-Type: application/json" \
+  -d '{"numQubits":2,"shots":1000,"steps":[["H",null],["CTRL","TARG"]]}'
+```
+
+Returns `stateVector` (list of `{re, im}`), `counts`, and `executedShots`. A Bell-state circuit should give roughly 50/50 `00` and `11`.
+
+---
+
+## 🧩 Qiskit IDE limitations
+
+The Qiskit IDE uses Python's `ast` module to **read** your code — it never runs it, which is a deliberate safety choice. As a result, it only understands a small subset:
+
+- The circuit variable must be named **`qc`**, created with `QuantumCircuit(n)`.
+- Supported calls (top level only, with literal arguments): `h x y z s t`, `rx ry rz` (angles may use `pi` and `+ - * /`), `cx`, `cz`, `swap`.
+- **Qubits are clamped to 6.** Gates on wires beyond the limit are dropped.
+- Loops, functions, variables as qubit indices, other gates (`ccx`, etc.), and `measure` are **silently ignored**.
+
+If "Run & Sync" produces fewer gates than you expect, one of these is why.
 
 ---
 
@@ -123,205 +146,92 @@ All endpoints are POST-based and return JSON simulation results.
 
 ```
 Quantum-Simulator-V3.0/
+├── quantum_backend/
+│   ├── run.py                     # Entry point (port 5000)
+│   ├── requirement.txt
+│   └── app/
+│       ├── __init__.py            # Flask app factory (CORS enabled)
+│       ├── routes.py              # All API endpoints
+│       └── services/
+│           ├── quantum_sim.py     # N-qubit state-vector simulator (PyTorch)
+│           ├── grover.py
+│           ├── shor.py
+│           ├── qft.py
+│           ├── qaoa.py
+│           ├── vqe.py
+│           └── qiskit_parser.py   # AST-based Qiskit subset parser
 │
-├── quantum_backend/                # Flask REST API
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── routes.py              # API endpoints
-│   │   └── services/              # Algorithm implementations
-│   │       ├── quantum_sim.py      # Core simulator
-│   │       ├── grover.py
-│   │       ├── shor.py
-│   │       ├── qft.py
-│   │       ├── vqe.py
-│   │       ├── qaoa.py
-│   │       └── qiskit_parser.py
-│   ├── run.py                     # Entry point
-│   └── requirement.txt
-│
-└── quantum_frontend/               # React + Vite app
-    ├── src/
-    │   ├── components/            # Reusable UI components
-    │   │   ├── BlochSphere.tsx     # 3D sphere visualization
-    │   │   ├── Histogram.tsx       # Measurement charts
-    │   │   ├── QiskitIde.tsx       # Code editor
-    │   │   └── ...
-    │   ├── pages/                 # Algorithm-specific pages
-    │   ├── views/                 # Main layouts
-    │   │   ├── CircuitDesigner.tsx
-    │   │   └── Dashboard.tsx
-    │   └── quantum/               # Quantum logic (TypeScript)
-    │       ├── simulator.ts
-    │       ├── math.ts
-    │       └── qiskitParser.ts
-    ├── package.json
-    ├── vite.config.ts
-    └── index.html
+└── quantum_frontend/
+    └── src/
+        ├── App.tsx
+        ├── views/                 # Dashboard.tsx, CircuitDesigner.tsx
+        ├── pages/                 # Grover, Shor, QFT, QAOA, VQE, StateVisualization
+        ├── components/            # BlochSphere, Histogram, PhaseCircle,
+        │                          # QiskitIde, PythonCodeView, ...
+        └── quantum/               # simulator.ts (local fallback), math.ts, qiskitParser.ts
 ```
 
 ---
 
-## 🎓 Use Cases
+## 🛠️ Technology
 
-### Learning
-- 📚 Understand quantum algorithms visually
-- 🧠 Experiment with quantum circuits interactively
-- 💡 See how gates transform quantum states in real-time
+**Frontend:** React 19, TypeScript, Vite, Tailwind CSS 4, Three.js with `@react-three/fiber` / `drei`, lucide-react
+**Backend:** Flask 3, Flask-CORS, PyTorch, NumPy
 
-### Research & Development
-- 🔬 Test quantum algorithm implementations
-- ⚙️ Prototype quantum solutions
-- 📊 Analyze measurement statistics and probabilities
-
-### Education
-- 👨‍🎓 Teach quantum computing concepts
-- 🎯 Create interactive demonstrations
-- 🏆 Build student projects
+Exact versions are pinned in `quantum_backend/requirement.txt` and `quantum_frontend/package.json`.
 
 ---
 
-## 🔧 Development
+## 🧪 Development
 
-### Environment Setup
 ```bash
-# Backend
-cd quantum_backend
-python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-pip install -r requirement.txt
-
 # Frontend
 cd quantum_frontend
-npm install
+npm run dev      # dev server
+npm run lint     # ESLint
+npm run build    # type-check + production build → dist/
 ```
 
-### Running Tests
-```bash
-# Backend tests (if available)
-cd quantum_backend
-pytest
+There is **no automated test suite yet**. Good first tests to add:
 
-# Frontend tests
-cd quantum_frontend
-npm run test
-```
+- Bell state → ~50/50 `00`/`11`
+- GHZ state → ~50/50 `000`/`111`
+- Grover (3 qubits, 2 iterations) → target probability ≈ 94%
+- Backend and TypeScript simulators agree on random circuits
 
-### Building for Production
-```bash
-# Frontend build
-cd quantum_frontend
-npm run build
-# Output: dist/
+### Known limitations
 
-# Backend deployment
-cd quantum_backend
-# Deploy using Gunicorn, Docker, or your hosting platform
-```
+- Simulation cost grows as 2ⁿ. The UI caps the designer at 6 qubits; the backend does **not** validate `numQubits` on `/simulate`, `/simulate-grover` or `/simulate-shor`, so don't expose it to untrusted users as-is.
+- `run.py` starts Flask with `debug=True` and CORS open to all origins. This is for **local development only** — do not deploy it that way.
+- The frontend calls `http://127.0.0.1:5000` directly (hardcoded). If you host the backend elsewhere, update the URLs in `src/quantum/` and `src/pages/`.
+- The designer silently falls back to the local TypeScript simulator when the backend is unreachable.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to help:
+1. Fork the repo and create a branch (`git checkout -b feature/my-change`)
+2. Make your changes and commit
+3. Open a pull request
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+Especially welcome:
 
-**Ideas for contributions:**
-- ✨ New quantum algorithms
-- 🎨 UI/UX improvements
-- 🐛 Bug fixes
-- 📚 Documentation & tutorials
-- 🧪 Unit tests
-- ⚡ Performance optimizations
-
----
-
-## 📦 Dependencies
-
-### Backend (`requirement.txt`)
-```
-Flask==2.3.0
-qiskit==0.43.0
-qiskit-aer==0.12.0
-numpy==1.24.0
-flask-cors==4.0.0
-```
-
-### Frontend (`package.json`)
-```
-React 18.x
-TypeScript 5.x
-Vite 5.x
-Three.js 152.x
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Backend not connecting?
-- Ensure backend is running: `http://localhost:5000`
-- Check CORS headers in `routes.py`
-- Verify `requirement.txt` is installed: `pip list | grep qiskit`
-
-### Frontend shows blank screen?
-- Clear browser cache and restart dev server
-- Check console for TypeScript errors
-- Ensure Node.js 18+ is installed: `node --version`
-
-### Algorithm runs slowly?
-- Reduce the number of qubits (complexity grows exponentially)
-- Close other applications to free up CPU
-- For production, use optimized Qiskit backends
-
----
-
-## 📊 Benchmarks
-
-- ⚡ Simulate up to **15+ qubits** on standard hardware
-- 🔄 Grover's algorithm: **< 2 seconds** for 10-qubit search
-- 🎯 Real-time circuit visualization at **60 FPS**
+- A real statevector **QAOA** and **VQE** (cost/mixer unitaries or an ansatz + classical optimizer)
+- Input validation and qubit caps on the backend
+- A test suite (pytest + Vitest)
+- A configurable API URL (`VITE_API_URL`)
+- Better Qiskit parsing (loops, `measure`, `ccx`) with clear errors for unsupported code
 
 ---
 
 ## 📝 License
 
-MIT License © 2024 [bukac82](https://github.com/bukac82)
-
-Feel free to use, modify, and distribute this project. See [LICENSE](LICENSE) for details.
-
----
-
-## 🌟 Show Your Support
-
-If this project helped you learn quantum computing, please consider:
-
-- ⭐ **Star this repository** (it helps others discover it!)
-- 📢 **Share** with your quantum computing community
-- 🐛 **Report bugs** and **suggest features** via Issues
-- 🤝 **Contribute** code, documentation, or ideas
+Add a `LICENSE` file to the repository root (e.g. MIT) so others know how they may use this project.
 
 ---
 
 ## 📚 Learning Resources
 
-- [Qiskit Documentation](https://qiskit.org/documentation/)
-- [IBM Quantum Computing 101](https://quantum.ibm.com/composer/docs/iqx/guide/)
-- [Quantum Algorithm Papers](https://arxiv.org/list/quant-ph/recent)
-
----
-
-## 🔗 Links
-
-- 🌐 **Live Demo** (if deployed): `[Add your demo URL]`
-- 📖 **Full Documentation**: See `/docs` (coming soon)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/bukac82/Quantum-Simulator-V3.0/discussions)
-- 🐛 **Issue Tracker**: [Report a bug](https://github.com/bukac82/Quantum-Simulator-V3.0/issues)
-
----
-
-**Built with ❤️ for the quantum computing community**
+- [Qiskit Documentation](https://docs.quantum.ibm.com/)
+- [Qiskit Textbook](https://github.com/Qiskit/textbook)
+- [arXiv quant-ph](https://arxiv.org/list/quant-ph/recent)
